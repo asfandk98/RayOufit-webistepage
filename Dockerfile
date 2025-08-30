@@ -15,13 +15,13 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files first to leverage Docker cache
+# Copy composer files first
 COPY composer.json composer.lock ./
 
-# Install dependencies without running artisan scripts
+# Install dependencies without artisan scripts
 RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
-# Copy the full project (artisan and everything else)
+# Copy full project
 COPY . .
 
 # -----------------------------
@@ -47,8 +47,8 @@ COPY --from=build /var/www/html/vendor ./vendor
 # Set permissions (important for Laravel)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose PHP-FPM port
-EXPOSE 9000
+# Expose port 8080 for Render auto-detection
+EXPOSE 8080
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+# Run Laravel with PHP built-in server
+CMD php -S 0.0.0.0:8080 -t public
